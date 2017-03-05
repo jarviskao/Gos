@@ -5,7 +5,7 @@ if GetObjectName(GetMyHero()) ~= "Garen" then return end
 require ("DamageLib")
 
 --Auto Update
-local ver = "1.00"
+local ver = "1.1"
 
 
 function AutoUpdate(data)
@@ -67,9 +67,6 @@ GMenu.cl.j:Boolean("E", "Use E", true)
 
 --Draw Menu
 GMenu:SubMenu("d", "Draw")
---GMenu.d:SubMenu("dt", "Text")
---GMenu.d.dt:Boolean("Stats", "Draw HP and R Damage Info", true)
---GMenu.d.dt:Boolean("R", "Draw R kill Notification", true)
 GMenu.d:SubMenu("ds", "Spells")
 GMenu.d.ds:Boolean("E", "Draw E Range", true)
 GMenu.d.ds:Boolean("R", "Draw R Range", true)
@@ -86,8 +83,8 @@ true)
 local LoL = "7.x"
 
 --Spells
-local GarenE_Range = GetCastRange(myHero, _E)
-local GarenR_Range = GetCastRange(myHero, _R)
+local GarenE.range = { range = GetCastRange(myHero, _E) }
+local GarenR.range = { range = GetCastRange(myHero, _R) }
 
 --Mode
 function Mode()
@@ -119,28 +116,6 @@ OnTick(function (myHero)
 end)
 
 OnDraw(function(myHero)
---[[
-    --Text
-    for x,unit in pairs(GetEnemyHeroes()) do 
-        if ValidTarget(unit,2000) and WorldToScreen(0,unit.pos).flag and GMenu.d.dt.Stats:Value() then
-            if Ready(_R) then
-                DrawText("R Damage: "..getdmg("R",unit,myHero), 16, GetHPBarPos(unit).x, GetHPBarPos(unit).y-58, GoS.Yellow)
-            end
-            if not Ready(_R) then
-                DrawText("R Damage: Not Ready", 16, GetHPBarPos(unit).x, GetHPBarPos(unit).y-58, GoS.Yellow)
-            end
-            DrawText("Current HP:  "..math.round(GetCurrentHP(unit)), 16, GetHPBarPos(unit).x, GetHPBarPos(unit).y-43, GoS.Red)
-        end
-        if GMenu.d.dt.R:Value() and Ready(_R) and ValidTarget(unit,1500) and GetCurrentHP(unit) + GetDmgShield(unit) <  getdmg("R",unit,myHero) then
-            if GMenu.Ultimate.black[unit.name]:Value() then
-                DrawText("Finish Him!", 25, GetHPBarPos(unit).x, GetHPBarPos(unit).y+18, GoS.Red)
-                DrawCircle(unit, 120, 3, 15, GoS.Red)
-                DrawCircle(unit, 90, 3, 15, GoS.Red)
-                DrawCircle(unit, 60, 3, 15, GoS.Red)
-            end
-        end
-    end
---]]
     --Range
     if not IsDead(myHero) then
         if GMenu.d.ds.E:Value() then DrawCircle(myHero, GetCastRange(myHero, _E), 2, 15, GoS.Red) end
@@ -156,7 +131,7 @@ function OnCombo(target)
 			CastSpell(_Q)
 		end
 		--E
-		if Ready(_E) and GMenu.c.E:Value() and ValidTarget(target, GarenE_Range) and GetCastName(myHero, _E) == "GarenE" then
+		if Ready(_E) and GMenu.c.E:Value() and ValidTarget(target, GarenE.range) and GetCastName(myHero, _E) == "GarenE" then
 			CastSpell(_E)
 		end
 	end
@@ -184,7 +159,7 @@ function OnHarass(target)
             CastSpell(_Q)
         end
         --E
-        if Ready(_E) and GMenu.h.E:Value() and ValidTarget(target, GarenE_Range) and GetCastName(myHero, _E) == "GarenE" then
+        if Ready(_E) and GMenu.h.E:Value() and ValidTarget(target, GarenE.range) and GetCastName(myHero, _E) == "GarenE" then
             CastSpell(_E)
         end
     end
@@ -199,7 +174,7 @@ function OnClear()
                     CastSpell(_Q)
                 end
                 --E
-                if Ready(_E) and GMenu.cl.l.E:Value() and ValidTarget(minion, GarenE_Range) and GetCastName(myHero, _E) == "GarenE" and MinionsAround(minion, 950) >= 3 then
+                if Ready(_E) and GMenu.cl.l.E:Value() and ValidTarget(minion, GarenE.range) and GetCastName(myHero, _E) == "GarenE" and MinionsAround(minion, 950) >= 3 then
                     CastSpell(_E)
                 end
             end
@@ -213,7 +188,7 @@ function OnClear()
                     CastSpell(_Q)
                 end
                 --E
-                if Ready(_E) and GMenu.cl.j.E:Value() and ValidTarget(mob, GarenE_Range) and GetCastName(myHero, _E) == "GarenE" then
+                if Ready(_E) and GMenu.cl.j.E:Value() and ValidTarget(mob, GarenE.range) and GetCastName(myHero, _E) == "GarenE" then
                     CastSpell(_E)
                 end
             end
@@ -223,8 +198,9 @@ end
 
 function CastR()
     for _,unit in pairs(GetEnemyHeroes()) do
-        if GMenu.Ultimate.R:Value() and Ready(_R) and ValidTarget(unit, GarenR_Range) and GetCurrentHP(unit) + GetDmgShield(unit) <  getdmg("R",unit,myHero) then
+        if GMenu.Ultimate.R:Value() and Ready(_R) and ValidTarget(unit, GarenR.range) and GetCurrentHP(unit) + GetDmgShield(unit) <  getdmg("R",unit,myHero) then
             if GMenu.Ultimate.black[unit.name]:Value() then
+				BlockCast()
                 CastTargetSpell(unit,_R)
             end
         end
