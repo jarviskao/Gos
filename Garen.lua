@@ -79,8 +79,8 @@ GMenu.cl.j:Boolean("E", "Use E", true)
 --Draw Menu
 GMenu:SubMenu("d", "Draw")
 GMenu.d:SubMenu("ds", "Spells")
-GMenu.d.ds:Boolean("E", "Draw E Range", true)
-GMenu.d.ds:Boolean("R", "Draw R Range", true)
+GMenu.d.ds:Boolean("E", "Draw E Range", false)
+GMenu.d.ds:Boolean("R", "Draw R Range", false)
 
 --Skin Menu
 GMenu:SubMenu("s", "Skin Changer")
@@ -109,6 +109,8 @@ function Mode()
         return DACR:Mode()
 	elseif _G.SLW_Loaded and SLW:Mode() then
         return SLW:Mode()
+	elseif GoSWalkLoaded and GoSWalk.CurrentMode then
+        return ({"Combo", "Harass", "LaneClear", "LastHit"})[GoSWalk.CurrentMode+1]
     end
 end
 
@@ -129,8 +131,8 @@ end)
 OnDraw(function(myHero)
     --Range
     if not IsDead(myHero) then
-        if GMenu.d.ds.E:Value() then DrawCircle(myHero, GetCastRange(myHero, _E), 2, 15, GoS.Red) end
-        if GMenu.d.ds.R:Value() then DrawCircle(myHero, GetCastRange(myHero, _R), 2, 15, GoS.Green) end
+        if GMenu.d.ds.E:Value() then DrawCircle(myHero, GarenE.range, 1, 15, GoS.Red) end
+        if GMenu.d.ds.R:Value() then DrawCircle(myHero, GarenR.range, 1, 15, GoS.Green) end
     end 
 end)
 
