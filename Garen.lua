@@ -40,13 +40,14 @@ GMenu.c:Boolean("Q", "Use Q", true)
 GMenu.c:Slider("Qrange", "Min. range for use Q", 300, 0, 1000, 10)
 GMenu.c:Boolean("E", "Use E", true)
 
---Ultimate Menu
-GMenu:SubMenu("Ultimate", "Ultimate")
-GMenu.Ultimate:Boolean("R", "Use R", true)
-GMenu.Ultimate:SubMenu("black", "Ultimate White List")
+--KillSteal Menu
+GMenu:SubMenu("KillSteal", "KillSteal")
+--GMenu.KillSteal:Boolean("Q", "Use Q", true)
+GMenu.KillSteal:Boolean("R", "Use R", true)
+GMenu.KillSteal:SubMenu("black", "KillSteal White List")
 DelayAction(function()
     for _, unit in pairs(GetEnemyHeroes()) do
-        GMenu.Ultimate.black:Boolean(unit.name, "Use R On: "..unit.charName, true)
+        GMenu.KillSteal.black:Boolean(unit.name, "Use R On: "..unit.charName, true)
     end
 end, 0.01)
 
@@ -121,7 +122,7 @@ OnTick(function (myHero)
         OnLastHit()
         OnHarass(target)
         OnClear()
-        CastR()
+        KillSteal()
 	end
 end)
 
@@ -206,14 +207,19 @@ function OnClear()
     end
 end
 
-function CastR()
+function KillSteal()
     for _,unit in pairs(GetEnemyHeroes()) do
-        if GMenu.Ultimate.R:Value() and Ready(_R) and ValidTarget(unit, GarenR.range) and GetCurrentHP(unit) + GetDmgShield(unit) <  getdmg("R",unit,myHero) then
-            if GMenu.Ultimate.black[unit.name]:Value() then
-				BlockCast()
+		if IsRecalling(myHero) then return end
+        if GMenu.KillSteal.R:Value() and Ready(_R) and ValidTarget(unit, GarenR.range) and GetCurrentHP(unit) + GetDmgShield(unit) <  getdmg("R",unit,myHero) then
+            if GMenu.KillSteal.black[unit.name]:Value() then
                 CastTargetSpell(unit,_R)
             end
         end
+        --[[
+        if  GMenu.KillSteal.Q:Value() and Ready(_Q) and ValidTarget(unit, GMenu.c.Qrange:Value()) and GetCurrentHP(unit) + GetDmgShield(unit) <  getdmg("Q",unit,myHero) then  
+			CastTargetSpell(unit,_Q)
+		end
+		--]]
     end
 end
 
