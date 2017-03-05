@@ -83,8 +83,8 @@ true)
 local LoL = "7.x"
 
 --Spells
-local GarenE.range = { range = GetCastRange(myHero, _E) }
-local GarenR.range = { range = GetCastRange(myHero, _R) }
+local GarenE = { range = GetCastRange(myHero, _E) }
+local GarenR = { range = GetCastRange(myHero, _R) }
 
 --Mode
 function Mode()
