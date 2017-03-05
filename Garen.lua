@@ -41,10 +41,10 @@ DelayAction(function()
 end, 0.01)
 
 --Auto Menu
-GMenu:SubMenu("a", "Auto")
-GMenu.a:Boolean("W", "Use W", true)
-GMenu.a:Slider("Whp", "Use W if HP(%) <= X", 70, 0, 100, 5)
-GMenu.a:Slider("Wlim", "Use W if Enemy Count >= X", 1, 1, 5, 1)
+GMenu:SubMenu("Auto", "Auto")
+GMenu.Auto:Boolean("W", "Use W", true)
+GMenu.Auto:Slider("Whp", "Use W if HP(%) <= X", 70, 0, 100, 5)
+GMenu.Auto:Slider("Wlim", "Use W if Enemy Count >= X", 1, 1, 5, 1)
 
 --LastHit Menu
 GMenu:SubMenu("l", "Last Hit")
@@ -67,9 +67,9 @@ GMenu.cl.j:Boolean("E", "Use E", true)
 
 --Draw Menu
 GMenu:SubMenu("Draw", "Draw")
-GMenu.Draw:SubMenu("Text", "Text")
-GMenu.Draw.Text:Boolean("Stats", "Draw HP and R Damage Info", true)
-GMenu.Draw.Text:Boolean("R", "Draw R kill Notification", true)
+--GMenu.Draw:SubMenu("Text", "Text")
+--GMenu.Draw.Text:Boolean("Stats", "Draw HP and R Damage Info", true)
+--GMenu.Draw.Text:Boolean("R", "Draw R kill Notification", true)
 GMenu.Draw:SubMenu("Spells", "Spells")
 GMenu.Draw.Spells:Boolean("E", "Draw E Range", true)
 GMenu.Draw.Spells:Boolean("R", "Draw R Range", true)
@@ -119,6 +119,7 @@ OnTick(function (myHero)
 end)
 
 OnDraw(function(myHero)
+	--[[
     --Text
     for x,unit in pairs(GetEnemyHeroes()) do 
         if ValidTarget(unit,2000) and WorldToScreen(0,unit.pos).flag and GMenu.Draw.Text.Stats:Value() then
@@ -130,6 +131,7 @@ OnDraw(function(myHero)
             end
             DrawText("Current HP:  "..math.round(GetCurrentHP(unit)), 16, GetHPBarPos(unit).x, GetHPBarPos(unit).y-43, GoS.Red)
         end
+        
         if GMenu.Draw.Text.R:Value() and Ready(_R) and ValidTarget(unit,1500) and GetCurrentHP(unit) + GetDmgShield(unit) <  getdmg("R",unit,myHero) then
             if GMenu.Ultimate.black[unit.name]:Value() then
                 DrawText("Finish Him!", 25, GetHPBarPos(unit).x, GetHPBarPos(unit).y+18, GoS.Red)
@@ -138,13 +140,16 @@ OnDraw(function(myHero)
                 DrawCircle(unit, 60, 3, 15, GoS.Red)
             end
         end
+        
     end
-
+	--]]
+	
     --Range
     if not IsDead(myHero) then
-        if GMenu.Draw.Spells.E:Value() and Ready(_E) then DrawCircle(myHero, GarenE_Range, 2, 15, GoS.Red) end
-        if GMenu.Draw.Spells.R:Value() and Ready(_R) then DrawCircle(myHero, GarenR_Range, 2, 15, GoS.Green) end
+        if GMenu.Draw.Spells.E:Value() then DrawCircle(myHero, GarenE_Range, 2, 15, GoS.Red) end
+        if GMenu.Draw.Spells.R:Value() then DrawCircle(myHero, GarenR_Range, 2, 15, GoS.Green) end
     end 
+    
 end)
 
 --Functions
@@ -232,8 +237,8 @@ end
 
 --CB
 OnProcessSpell(function(unit,spellProc)    
-    if unit.isMe and spellProc.name:lower():find("attack") and EnemiesAround(myHero, 950) >= GMenu.a.Wlim:Value() then     
-        if GMenu.a.W:Value() and Ready(_W) and GetPercentHP(myHero) < GMenu.a.Whp:Value() then 
+    if unit.isMe and spellProc.name:lower():find("attack") and EnemiesAround(myHero, 950) >= GMenu.Auto.Wlim:Value() then     
+        if GMenu.Auto.W:Value() and Ready(_W) and GetPercentHP(myHero) < GMenu.Auto.Whp:Value() then 
             CastSpell(_W)   
         end
     end
