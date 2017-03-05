@@ -15,7 +15,7 @@ if GetObjectName(GetMyHero()) ~= "Garen" then return end
 require ("DamageLib")
 
 --Auto Update
-local ver = "1.1"
+local ver = "1.2"
 
 
 function AutoUpdate(data)
