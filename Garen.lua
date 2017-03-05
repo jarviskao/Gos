@@ -1,3 +1,13 @@
+--[[
+This is not my work and i make a little change
+It made by BluePrinceEB
+origninal source: https://github.com/BluePrinceEB/GoS/blob/master/Garen.lua
+
+It modified by Jarviskao 
+source: https://github.com/jarviskao/Gos/blob/master/Garen.lua
+
+]]
+
 --Hero
 if GetObjectName(GetMyHero()) ~= "Garen" then return end
 
