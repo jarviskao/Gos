@@ -59,6 +59,7 @@ end, 0.01)
 
 --Draw Menu
 DMenu:SubMenu("Draw", "Draw")
+--DMenu.Draw:Boolean("DrawStack", "Draw Stack Text", false)
 DMenu.Draw:SubMenu("Spells", "Spells")
 DMenu.Draw.Spells:Boolean("Q", "Draw Q Range", false)
 DMenu.Draw.Spells:Boolean("E", "Draw E Range", false)
@@ -85,6 +86,8 @@ function Mode()
         return DACR:Mode()
 	elseif _G.SLW_Loaded and SLW:Mode() then
         return SLW:Mode()
+    elseif GoSWalkLoaded and GoSWalk.CurrentMode then
+        return ({"Combo", "Harass", "LaneClear", "LastHit"})[GoSWalk.CurrentMode+1]
     end
 end
 
@@ -109,22 +112,40 @@ OnDraw(function(myHero)
 		end
         if DMenu.Draw.Spells.E:Value() then DrawCircle(myHero, DariusE.range, 1, 15, GoS.Green) end
         if DMenu.Draw.Spells.R:Value() then DrawCircle(myHero, DariusR.range, 1, 15, GoS.Blue) end
+        --[[
+		for _, enemy in pairs(GetEnemyHeroes()) do
+			if DMenu.Draw.DrawStack:Value() and Ready(_R) then
+				local barPos = GetHPBarPos(enemy)
+				if rDebuff[enemy.networkID] ~= nil and ValidTarget(enemy, 2000) then
+					if rDebuff[enemy.networkID] == 0 then
+						DrawTextA("1", 35, barPos.x+135, barPos.y-17, ARGB(255, 0, 255, 0))
+					elseif rDebuff[enemy.networkID] == 1 then
+						DrawTextA("2", 35, barPos.x+135, barPos.y-17, ARGB(255, 173, 255, 47))
+					elseif rDebuff[enemy.networkID] == 2 then
+						DrawTextA("3", 35, barPos.x+135, barPos.y-17, ARGB(255, 255, 255, 0))
+					elseif rDebuff[enemy.networkID] == 3 then
+						DrawTextA("4", 35, barPos.x+135, barPos.y-17, ARGB(255, 255, 165, 0))
+					elseif rDebuff[enemy.networkID] == 4 then
+						DrawTextA("5", 35, barPos.x+135, barPos.y-17, ARGB(255, 139, 69, 0))
+					elseif rDebuff[enemy.networkID] == 5 then
+						DrawTextA("Max Stacks", 35, barPos.x+135, barPos.y-17, ARGB(255, 255, 0, 0))
+					end
+				end
+			end
+		end
+		--]]
     end 
 end)
 
 OnUpdateBuff (function(unit, buff)
-  if not unit or not buff then
-    return
-  end
+  if not unit or not buff then return end
   if buff.Name:lower() == "dariushemo" and GetTeam(buff) ~= (GetTeam(myHero)) and myHero.type == unit.type then
         rDebuff[unit.networkID] = buff.Count
     end
 end)
 
 OnRemoveBuff (function(unit, buff)
-  if not unit or not buff then
-    return
-  end
+  if not unit or not buff then return end
   if buff.Name:lower() == "dariushemo" and GetTeam(buff) ~= (GetTeam(myHero)) and myHero.type == unit.type then
         rDebuff[unit.networkID] = 0
     end
@@ -146,24 +167,22 @@ end
 
 function OnClear()
     if Mode() == "LaneClear" then
-        for _, minion in pairs(minionManager.objects) do
-            if GetTeam(minion) == MINION_ENEMY then
+        for _, unit in pairs(minionManager.objects) do
+        --Lane Clear
+            if GetTeam(unit) == MINION_ENEMY then
                 --Q
-                if Ready(_Q) and DMenu.Clear.LaneClear.Q:Value() and ValidTarget(minion, 300) then
+                if Ready(_Q) and DMenu.Clear.LaneClear.Q:Value() and ValidTarget(unit, 300) then
                     CastSpell(_Q)
                 end 
             end
-        end
-    end
-    if Mode() == "LaneClear" then 
-        for _, mob in pairs(minionManager.objects) do
-            if GetTeam(mob) == MINION_JUNGLE then
+		--Jungle Clear
+            if GetTeam(unit) == MINION_JUNGLE then
                 --Q
-                if Ready(_Q) and DMenu.Clear.JungleClear.Q:Value() and ValidTarget(mob, 300) then
+                if Ready(_Q) and DMenu.Clear.JungleClear.Q:Value() and ValidTarget(unit, 300) then
                     CastSpell(_Q)
                 end
                 --W
-                if Ready(_W) and  DMenu.Clear.JungleClear.W:Value() and ValidTarget(mob, 200) then
+                if Ready(_W) and  DMenu.Clear.JungleClear.W:Value() and ValidTarget(unit, 250) then
                     CastSpell(_W)
                 end
             end
@@ -175,7 +194,7 @@ function KillSteal()
         for i,unit in pairs(GetEnemyHeroes()) do
         if rDebuff ~= nil then
 			local rStacks = rDebuff[unit.networkID] or 0
-			local rStacksDamage = (rStacks * ((GetSpellData(myHero, _R).level * 20) + (GetBonusDmg(myHero) * 0.15) ))
+			local rStacksDamage = (rStacks * ((GetSpellData(myHero, _R).level * 20) ))
 			local rDamage = getdmg("R",unit,myHero)
             if DMenu.KillSteal.R:Value() and Ready(_R) and ValidTarget(unit,DariusR.range) and  GetCurrentHP(unit) + GetDmgShield(unit) + GetHPRegen(unit) * 0.25 < rDamage + rStacksDamage then
 				CastTargetSpell(unit, _R)
