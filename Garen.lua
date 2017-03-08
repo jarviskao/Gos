@@ -120,10 +120,10 @@ end
 OnTick(function ()
 	if not IsDead(myHero) then
 		--Functions
-		OnCombo()
-        OnLastHit()
-        OnHarass()
-        OnClear()
+		Combo()
+        LastHit()
+        Harass()
+        Clear()
         KillSteal()
 	end
 end)
@@ -148,7 +148,7 @@ function CurrentTarget()
 	end
 end
 
-function OnCombo()
+function Combo()
 	if Mode() == "Combo" then
 		local target = CurrentTarget()
 		--Q
@@ -162,7 +162,7 @@ function OnCombo()
 	end
 end
 
-function OnLastHit()
+function LastHit()
     if Mode() == "LastHit" then
         for _, minion in pairs(minionManager.objects) do
             if GetTeam(minion) == MINION_ENEMY then
@@ -177,7 +177,7 @@ function OnLastHit()
     end
 end
 
-function OnHarass()
+function Harass()
     if Mode() == "Harass" then
 		local target = CurrentTarget()
         --Q
@@ -191,7 +191,7 @@ function OnHarass()
     end
 end
 
-function OnClear()
+function Clear()
     if Mode() == "LaneClear" then
         for _, minion in pairs(minionManager.objects) do
             if GetTeam(minion) == MINION_ENEMY then
