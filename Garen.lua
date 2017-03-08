@@ -12,7 +12,7 @@ source: https://github.com/jarviskao/Gos/blob/master/Garen.lua
 if GetObjectName(GetMyHero()) ~= "Garen" then return end
 
 --Load Libs
-require ("DamageLib")
+require "DamageLib"
 
 --Auto Update
 local ver = "1.2"
@@ -42,7 +42,6 @@ GMenu.c:Boolean("E", "Use E", true)
 
 --KillSteal Menu
 GMenu:SubMenu("KillSteal", "KillSteal")
---GMenu.KillSteal:Boolean("Q", "Use Q", true)
 GMenu.KillSteal:Boolean("R", "Use R", true)
 GMenu.KillSteal:SubMenu("black", "KillSteal White List")
 DelayAction(function()
@@ -52,10 +51,10 @@ DelayAction(function()
 end, 0.01)
 
 --Auto Menu
-GMenu:SubMenu("a", "Auto")
-GMenu.a:Boolean("W", "Use W", true)
-GMenu.a:Slider("Whp", "Use W if HP(%) <= X", 70, 0, 100, 5)
-GMenu.a:Slider("Wlim", "Use W if Enemy Count >= X", 1, 1, 5, 1)
+GMenu:SubMenu("Auto", "Auto")
+GMenu.Auto:Boolean("W", "Use W", true)
+GMenu.Auto:Slider("Whp", "Use W if HP(%) <= X", 80, 0, 100, 5)
+GMenu.Auto:Slider("Wlim", "Use W if Enemy Count >= X", 1, 1, 5, 1)
 
 --LastHit Menu
 GMenu:SubMenu("l", "Last Hit")
@@ -77,10 +76,10 @@ GMenu.cl.j:Boolean("Q", "Use Q", true)
 GMenu.cl.j:Boolean("E", "Use E", true)
 
 --Draw Menu
-GMenu:SubMenu("d", "Draw")
-GMenu.d:SubMenu("ds", "Spells")
-GMenu.d.ds:Boolean("E", "Draw E Range", false)
-GMenu.d.ds:Boolean("R", "Draw R Range", false)
+GMenu:SubMenu("Draw", "Draw")
+GMenu.Draw:SubMenu("Spells", "Spells")
+GMenu.Draw.Spells:Boolean("E", "Draw E Range", false)
+GMenu.Draw.Spells:Boolean("R", "Draw R Range", false)
 
 --Skin Menu
 GMenu:SubMenu("s", "Skin Changer")
@@ -98,47 +97,60 @@ local GarenE = { range = GetCastRange(myHero, _E) }
 local GarenR = { range = GetCastRange(myHero, _R) }
 
 --Mode
-function Mode()
-    if _G.IOW_Loaded and IOW:Mode() then
+function Mode() --Deftsu
+    if IOW_Loaded then
         return IOW:Mode()
-	elseif _G.PW_Loaded and PW:Mode() then
-        return PW:Mode()
-	elseif _G.DAC_Loaded and DAC:Mode() then
+    elseif DAC_Loaded then
         return DAC:Mode()
-	elseif _G.AutoCarry_Loaded and DACR:Mode() then
-        return DACR:Mode()
-	elseif _G.SLW_Loaded and SLW:Mode() then
-        return SLW:Mode()
-	elseif GoSWalkLoaded and GoSWalk.CurrentMode then
+    elseif PW_Loaded then
+        return PW:Mode()
+    elseif GoSWalkLoaded and GoSWalk.CurrentMode then
         return ({"Combo", "Harass", "LaneClear", "LastHit"})[GoSWalk.CurrentMode+1]
+    elseif AutoCarry_Loaded then
+        return DACR:Mode()
+    elseif _G.SLW_Loaded then
+        return SLW:Mode()
+    elseif EOW_Loaded then
+        return EOW:Mode()
     end
+    return ""
 end
 
 --Start
-OnTick(function (myHero)
+OnTick(function ()
 	if not IsDead(myHero) then
-		--Locals
-		local target = GetCurrentTarget()
 		--Functions
-		OnCombo(target)
+		OnCombo()
         OnLastHit()
-        OnHarass(target)
+        OnHarass()
         OnClear()
         KillSteal()
 	end
 end)
 
-OnDraw(function(myHero)
+OnDraw(function()
     --Range
     if not IsDead(myHero) then
-        if GMenu.d.ds.E:Value() then DrawCircle(myHero, GarenE.range, 1, 15, GoS.Red) end
-        if GMenu.d.ds.R:Value() then DrawCircle(myHero, GarenR.range, 1, 15, GoS.Green) end
+        if GMenu.Draw.Spells.E:Value() then DrawCircle(myHero, GarenE.range, 1, 15, GoS.Red) end
+        if GMenu.Draw.Spells.R:Value() then DrawCircle(myHero, GarenR.range, 1, 15, GoS.Green) end
     end 
 end)
 
 --Functions
-function OnCombo(target)
+
+function CurrentTarget()
+	if GoSWalkLoaded then
+		return GoSWalk.CurrentTarget
+	elseif AutoCarry_Loaded then
+		return DACR:GetTarget()
+	else
+		return GetCurrentTarget()
+	end
+end
+
+function OnCombo()
 	if Mode() == "Combo" then
+		local target = CurrentTarget()
 		--Q
 		if Ready(_Q) and GMenu.c.Q:Value() and ValidTarget(target, GMenu.c.Qrange:Value()) then
 			CastSpell(_Q)
@@ -165,8 +177,9 @@ function OnLastHit()
     end
 end
 
-function OnHarass(target)
+function OnHarass()
     if Mode() == "Harass" then
+		local target = CurrentTarget()
         --Q
         if Ready(_Q) and GMenu.h.Q:Value() and ValidTarget(target, GMenu.h.Qrange:Value()) then
             CastSpell(_Q)
@@ -193,7 +206,8 @@ function OnClear()
             end
         end
     end
-    if Mode() == "LaneClear" then --[[JungleClear doesnt work :doge:]]
+    --[[JungleClear doesnt work :doge:]]
+    if Mode() == "LaneClear" then 
         for _, mob in pairs(minionManager.objects) do
             if GetTeam(mob) == MINION_JUNGLE then
                 --Q
@@ -211,24 +225,18 @@ end
 
 function KillSteal()
     for _,unit in pairs(GetEnemyHeroes()) do
-		if IsRecalling(myHero) then return end
         if GMenu.KillSteal.R:Value() and Ready(_R) and ValidTarget(unit, GarenR.range) and GetCurrentHP(unit) + GetDmgShield(unit) <  getdmg("R",unit,myHero) then
             if GMenu.KillSteal.black[unit.name]:Value() then
                 CastTargetSpell(unit,_R)
             end
         end
-        --[[
-        if  GMenu.KillSteal.Q:Value() and Ready(_Q) and ValidTarget(unit, GMenu.c.Qrange:Value()) and GetCurrentHP(unit) + GetDmgShield(unit) <  getdmg("Q",unit,myHero) then  
-			CastTargetSpell(unit,_Q)
-		end
-		--]]
     end
 end
 
 --CB
-OnProcessSpell(function(unit,spellProc)    
-    if unit.isMe and spellProc.name:lower():find("attack") and EnemiesAround(myHero, 950) >= GMenu.a.Wlim:Value() then     
-        if GMenu.a.W:Value() and Ready(_W) and GetPercentHP(myHero) < GMenu.a.Whp:Value() then 
+OnProcessSpell(function(unit,spell)    
+    if unit.isMe and spell.name:lower():find("attack") and EnemiesAround(myHero, 950) >= GMenu.Auto.Wlim:Value() then     
+        if GMenu.Auto.W:Value() and Ready(_W) and GetPercentHP(myHero) < GMenu.Auto.Whp:Value() then 
             CastSpell(_W)   
         end
     end
