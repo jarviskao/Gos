@@ -46,9 +46,9 @@ DMenu.Clear.LaneClear:Slider("WMana", "use W if Mana % >", 80, 0, 100, 1)
 -- Clear Menu (Jungle Clear)
 DMenu.Clear:SubMenu("JungleClear", "Jungle Clear")
 DMenu.Clear.JungleClear:Boolean("Q", "Use Q", true)
-DMenu.Clear.JungleClear:Slider("QMana", "use Q if Mana % >", 80, 0, 100, 1)
+DMenu.Clear.JungleClear:Slider("QMana", "use Q if Mana % >", 30, 0, 100, 1)
 DMenu.Clear.JungleClear:Boolean("W", "Use W", true)
-DMenu.Clear.JungleClear:Slider("WMana", "use W if Mana % >", 80, 0, 100, 1)
+DMenu.Clear.JungleClear:Slider("WMana", "use W if Mana % >", 30, 0, 100, 1)
 
 --KillSteal Menu
 DMenu:SubMenu("KillSteal", "KillSteal")
@@ -204,7 +204,9 @@ function KillSteal()
 			local rDamage = getdmg("R",unit,myHero)
 			local targetHP = GetCurrentHP(unit) + GetDmgShield(unit) + GetHPRegen(unit) * 0.25
 			if DMenu.KillSteal.R:Value() and Ready(_R) and ValidTarget(unit,DariusR.range) and targetHP  < rDamage + rStacksDamage then
-				CastTargetSpell(unit, _R)
+				if DMenu.KillSteal.black[unit.name]:Value() then
+					CastTargetSpell(unit, _R)
+				end
 			end
 		end
 	end
