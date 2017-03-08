@@ -148,8 +148,10 @@ end)
 function CurrentTarget()
 	if GoSWalkLoaded then
 		return GoSWalk.CurrentTarget
-	else
+	elseif AutoCarry_Loaded then
 		return DACR:GetTarget()
+	else
+		return GetCurrentTarget()
 	end
 end
 
