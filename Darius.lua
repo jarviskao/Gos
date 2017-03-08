@@ -10,7 +10,7 @@ if GetObjectName(GetMyHero()) ~= "Darius" then return end
 require "DamageLib"
 
 --Auto Update
-local ver = "1.0"
+local ver = "1.1"
 
 
 function AutoUpdate(data)
@@ -34,16 +34,21 @@ DMenu:SubMenu("Combo", "Combo")
 DMenu.Combo:Boolean("Q", "Use Q", true)
 DMenu.Combo:Boolean("W", "Use W", true)
 DMenu.Combo:Slider("Wrange", "Min. range for use W", 350, 0, 500, 10)
-DMenu.Combo:Boolean("E", "Use E", true)
+--DMenu.Combo:Boolean("E", "Use E", true)
 
---Clear Menu
+-- Clear Menu (Lane Clear)
 DMenu:SubMenu("Clear", "Clear")
 DMenu.Clear:SubMenu("LaneClear", "Lane Clear")
 DMenu.Clear.LaneClear:Boolean("Q", "Use Q", false)
+DMenu.Clear.LaneClear:Slider("QMana", "use Q if Mana % >", 80, 0, 100, 1)
 DMenu.Clear.LaneClear:Boolean("W", "Use W", false)
+DMenu.Clear.LaneClear:Slider("WMana", "use W if Mana % >", 80, 0, 100, 1)
+-- Clear Menu (Jungle Clear)
 DMenu.Clear:SubMenu("JungleClear", "Jungle Clear")
 DMenu.Clear.JungleClear:Boolean("Q", "Use Q", true)
+DMenu.Clear.JungleClear:Slider("QMana", "use Q if Mana % >", 80, 0, 100, 1)
 DMenu.Clear.JungleClear:Boolean("W", "Use W", true)
+DMenu.Clear.JungleClear:Slider("WMana", "use W if Mana % >", 80, 0, 100, 1)
 
 --KillSteal Menu
 DMenu:SubMenu("KillSteal", "KillSteal")
@@ -172,18 +177,18 @@ function Clear()
 			--Lane Clear
             if GetTeam(unit) == MINION_ENEMY then
                 --Q
-                if Ready(_Q) and DMenu.Clear.LaneClear.Q:Value() and ValidTarget(unit, DariusQ.range) then
+                if Ready(_Q) and DMenu.Clear.LaneClear.Q:Value() and ValidTarget(unit, DariusQ.range) and GetPercentMP(myHero) >= DMenu.Clear.LaneClear.QMana:Value() then
                     CastSpell(_Q)
                 end 
             end
 			--Jungle Clear
             if GetTeam(unit) == MINION_JUNGLE then
                 --Q
-                if Ready(_Q) and DMenu.Clear.JungleClear.Q:Value() and ValidTarget(unit, DariusQ.range) then
+                if Ready(_Q) and DMenu.Clear.JungleClear.Q:Value() and ValidTarget(unit, DariusQ.range) and GetPercentMP(myHero) >= DMenu.Clear.JungleClear.QMana:Value() then
                     CastSpell(_Q)
                 end
                 --W
-                if Ready(_W) and  DMenu.Clear.JungleClear.W:Value() and ValidTarget(unit, DMenu.Combo.Wrange:Value()) then
+                if Ready(_W) and  DMenu.Clear.JungleClear.W:Value() and ValidTarget(unit, DMenu.Combo.Wrange:Value()) and GetPercentMP(myHero) >= DMenu.Clear.JungleClear.WMana:Value() then
                     CastSpell(_W)
                 end
             end
