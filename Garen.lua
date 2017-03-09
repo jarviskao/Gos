@@ -75,8 +75,6 @@ GMenu.Auto:Boolean("W", "Use W", true)
 GMenu.Auto:Slider("Whp", "Use W if HP(%) <= X", 80, 0, 100, 5)
 GMenu.Auto:Slider("Wlim", "Use W if Enemy Count >= X", 1, 1, 5, 1)
 
-
-
 --Miscellaneous  (Auto Level Up Spell Menu)
 GMenu:SubMenu("Misc", "Miscellaneous")
 GMenu.Misc:SubMenu("LvUpSpell", "Auto Level Spell")
@@ -87,9 +85,9 @@ GMenu.Misc.LvUpSpell:Boolean("UseAutoLvSpell", "Use Auto Level Spell", false)
 GMenu.Misc:SubMenu("Skin", "Skin Changer")
   skinMeta = {["Garen"] = {"Classic", "Sanguine Garen", "Desert Trooper Garen", "Commando Garen", "Dreadknight Garen", "Rugged Garen", "Steel Legion Garen", "Garnet Chroma", "Plum Chroma", "Ivory Chroma", "Rogue Admiral Garen", "Warring Kingdoms Garen"}}
 GMenu.Misc.Skin:DropDown('skin', myHero.charName.. " Skins", 1, skinMeta[myHero.charName],function(model)
-						  HeroSkinChanger(myHero, model - 1) print(" [Skin] ".. skinMeta[myHero.charName][model] .." ".. myHero.charName .. " Loaded!") 
+						  HeroSkinChanger(myHero, model - 1) print("<font color=\"#0099FF\"><b>[Skin]</b></font> ".. skinMeta[myHero.charName][model] .." ".. myHero.charName .. " Loaded!") 
     end,true)
---Draw Menu
+--Miscellaneous  (Draw Spells Menu)
 GMenu.Misc:SubMenu("DrawSpells", "Draw Spells")
 GMenu.Misc.DrawSpells:Boolean("E", "Draw E Range", false)
 GMenu.Misc.DrawSpells:Boolean("R", "Draw R Range", false)
@@ -122,6 +120,23 @@ function Mode() --Deftsu
     return ""
 end
 
+OnDraw(function()
+    --Range
+    if not IsDead(myHero) then
+        if GMenu.Misc.DrawSpells.E:Value() then DrawCircle(myHero, GarenE.range, 1, 50, GoS.Red) end
+        if GMenu.Misc.DrawSpells.R:Value() then DrawCircle(myHero, GarenR.range, 1, 50, GoS.Green) end
+    end 
+end)
+
+OnProcessSpell(function(unit,spell)    
+    if unit.isMe and spell.name:lower():find("attack") and EnemiesAround(myHero, 950) >= GMenu.Auto.Wlim:Value() then     
+        if GMenu.Auto.W:Value() and Ready(_W) and GetPercentHP(myHero) < GMenu.Auto.Whp:Value() then 
+            CastSpell(_W)   
+        end
+    end
+end)
+
+
 --Start
 OnTick(function ()
 	if not IsDead(myHero) then
@@ -135,26 +150,7 @@ OnTick(function ()
 	end
 end)
 
-OnDraw(function()
-    --Range
-    if not IsDead(myHero) then
-        if GMenu.Misc.DrawSpells.E:Value() then DrawCircle(myHero, GarenE.range, 1, 50, GoS.Red) end
-        if GMenu.Misc.DrawSpells.R:Value() then DrawCircle(myHero, GarenR.range, 1, 50, GoS.Green) end
-    end 
-end)
-
 --Functions
-function AutoLvSpell()
-	if GetLevelPoints(myHero) > 0 and GMenu.Misc.LvUpSpell.UseAutoLvSpell:Value() then
-		if (myHero.level + 1 - GetLevelPoints(myHero)) then
-			DelayAction(function() 
-			LevelSpell(SkillOrders[1][myHero.level + 1 - GetLevelPoints(myHero)]) 
-			end, 1)
-		end
-	end
-end
-
-
 function CurrentTarget()
 	if GoSWalkLoaded then
 		return GoSWalk.CurrentTarget
@@ -209,8 +205,10 @@ function Harass()
 end
 
 function Clear()
+	--LaneClear
     if Mode() == "LaneClear" then
         for _, minion in pairs(minionManager.objects) do
+			
             if GetTeam(minion) == MINION_ENEMY then
                 --Q
                 if Ready(_Q) and GMenu.Clear.LaneClear.Q:Value() and ValidTarget(minion, 300) then
@@ -223,7 +221,7 @@ function Clear()
             end
         end
     end
-    --[[JungleClear doesnt work :doge:]]
+    --JungleClear
     if Mode() == "LaneClear" then 
         for _, mob in pairs(minionManager.objects) do
             if GetTeam(mob) == MINION_JUNGLE then
@@ -250,13 +248,14 @@ function KillSteal()
     end
 end
 
---CB
-OnProcessSpell(function(unit,spell)    
-    if unit.isMe and spell.name:lower():find("attack") and EnemiesAround(myHero, 950) >= GMenu.Auto.Wlim:Value() then     
-        if GMenu.Auto.W:Value() and Ready(_W) and GetPercentHP(myHero) < GMenu.Auto.Whp:Value() then 
-            CastSpell(_W)   
-        end
-    end
-end)
+function AutoLvSpell()
+	if GetLevelPoints(myHero) > 0 and GMenu.Misc.LvUpSpell.UseAutoLvSpell:Value() then
+		if (myHero.level + 1 - GetLevelPoints(myHero)) then
+			DelayAction(function() 
+			LevelSpell(SkillOrders[1][myHero.level + 1 - GetLevelPoints(myHero)]) 
+			end, 1)
+		end
+	end
+end
 
 print("<font color=\"#0099FF\"><b>[Garen]: Loaded</b></font> || Version: "..ver," ", "|| LoL Support : "..LoL)
