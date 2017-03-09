@@ -15,7 +15,7 @@ if GetObjectName(GetMyHero()) ~= "Garen" then return end
 require "DamageLib"
 
 --Auto Update
-local ver = "1.2"
+local ver = "1.5"
 
 
 function AutoUpdate(data)
@@ -40,22 +40,6 @@ GMenu.c:Boolean("Q", "Use Q", true)
 GMenu.c:Slider("Qrange", "Min. range for use Q", 300, 0, 1000, 10)
 GMenu.c:Boolean("E", "Use E", true)
 
---KillSteal Menu
-GMenu:SubMenu("KillSteal", "KillSteal")
-GMenu.KillSteal:Boolean("R", "Use R", true)
-GMenu.KillSteal:SubMenu("black", "KillSteal White List")
-DelayAction(function()
-    for _, unit in pairs(GetEnemyHeroes()) do
-        GMenu.KillSteal.black:Boolean(unit.name, "Use R On: "..unit.charName, true)
-    end
-end, 0.01)
-
---Auto Menu
-GMenu:SubMenu("Auto", "Auto")
-GMenu.Auto:Boolean("W", "Use W", true)
-GMenu.Auto:Slider("Whp", "Use W if HP(%) <= X", 80, 0, 100, 5)
-GMenu.Auto:Slider("Wlim", "Use W if Enemy Count >= X", 1, 1, 5, 1)
-
 --LastHit Menu
 GMenu:SubMenu("l", "Last Hit")
 GMenu.l:Boolean("Q", "Use Q", true)
@@ -75,26 +59,48 @@ GMenu.cl:SubMenu("j", "Jungle Clear")
 GMenu.cl.j:Boolean("Q", "Use Q", true)
 GMenu.cl.j:Boolean("E", "Use E", true)
 
---Draw Menu
-GMenu:SubMenu("Draw", "Draw")
-GMenu.Draw:SubMenu("Spells", "Spells")
-GMenu.Draw.Spells:Boolean("E", "Draw E Range", false)
-GMenu.Draw.Spells:Boolean("R", "Draw R Range", false)
+--KillSteal Menu
+GMenu:SubMenu("KillSteal", "KillSteal")
+GMenu.KillSteal:Boolean("R", "Use R", true)
+GMenu.KillSteal:SubMenu("black", "KillSteal White List")
+DelayAction(function()
+    for _, unit in pairs(GetEnemyHeroes()) do
+        GMenu.KillSteal.black:Boolean(unit.name, "Use R On: "..unit.charName, true)
+    end
+end, 0.5)
 
---Skin Menu
-GMenu:SubMenu("s", "Skin Changer")
-  skinMeta = {["Garen"] = {"Classic", "Sanguine", "Desert Trooper", "Commando", "Dreadknight", "Rugged", "Steel Legion", "Chroma Pack: Garnet", "Chroma Pack: Plum", "Chroma Pack: Ivory", "Rogue Admiral"}}
-  GMenu.s:DropDown('skin', myHero.charName.. " Skins", 1, skinMeta[myHero.charName],function(model)
-        HeroSkinChanger(myHero, model - 1) print(skinMeta[myHero.charName][model] .." ".. myHero.charName .. " Loaded!") 
-    end,
-true)
+--Auto Menu
+GMenu:SubMenu("Auto", "Auto Spell")
+GMenu.Auto:Boolean("W", "Use W", true)
+GMenu.Auto:Slider("Whp", "Use W if HP(%) <= X", 80, 0, 100, 5)
+GMenu.Auto:Slider("Wlim", "Use W if Enemy Count >= X", 1, 1, 5, 1)
+
+
+
+--Miscellaneous  (Auto Level Up Spell Menu)
+GMenu:SubMenu("Misc", "Miscellaneous")
+GMenu.Misc:SubMenu("LvUpSpell", "Auto Level Spell")
+GMenu.Misc.LvUpSpell:Info("AutoLvSpellInfo", "Order: Max Q -> E -> W")
+GMenu.Misc.LvUpSpell:Boolean("UseAutoLvSpell", "Use Auto Level Spell", false)
+
+--Miscellaneous  (Skin Menu) 
+GMenu.Misc:SubMenu("Skin", "Skin Changer")
+  skinMeta = {["Garen"] = {"Classic", "Sanguine Garen", "Desert Trooper Garen", "Commando Garen", "Dreadknight Garen", "Rugged Garen", "Steel Legion Garen", "Garnet Chroma", "Plum Chroma", "Ivory Chroma", "Rogue Admiral Garen", "Warring Kingdoms Garen"}}
+GMenu.Misc.Skin:DropDown('skin', myHero.charName.. " Skins", 1, skinMeta[myHero.charName],function(model)
+						  HeroSkinChanger(myHero, model - 1) print(skinMeta[myHero.charName][model] .." ".. myHero.charName .. " Loaded!") 
+    end,true)
+--Draw Menu
+GMenu.Misc:SubMenu("DrawSpells", "Draw Spells")
+GMenu.Misc.DrawSpells:Boolean("E", "Draw E Range", false)
+GMenu.Misc.DrawSpells:Boolean("R", "Draw R Range", false)
 
 --Locals
-local LoL = "7.x"
+local LoL = "7.5"
 
 --Spells
 local GarenE = { range = GetCastRange(myHero, _E) }
 local GarenR = { range = GetCastRange(myHero, _R) }
+local SkillOrders = { {_Q, _E, _W, _Q, _Q, _R, _Q,_E,_Q,_E,_R,_E,_E,_W,_W,_R,_W,_W} }
 
 --Mode
 function Mode() --Deftsu
@@ -125,18 +131,29 @@ OnTick(function ()
         Harass()
         Clear()
         KillSteal()
+        AutoLvSpell()
 	end
 end)
 
 OnDraw(function()
     --Range
     if not IsDead(myHero) then
-        if GMenu.Draw.Spells.E:Value() then DrawCircle(myHero, GarenE.range, 1, 15, GoS.Red) end
-        if GMenu.Draw.Spells.R:Value() then DrawCircle(myHero, GarenR.range, 1, 15, GoS.Green) end
+        if GMenu.Misc.DrawSpells.E:Value() then DrawCircle(myHero, GarenE.range, 1, 15, GoS.Red) end
+        if GMenu.Misc.DrawSpells.R:Value() then DrawCircle(myHero, GarenR.range, 1, 15, GoS.Green) end
     end 
 end)
 
 --Functions
+function AutoLvSpell()
+	if GetLevelPoints(myHero) > 0 and GMenu.Misc.LvUpSpell.UseAutoLvSpell:Value() then
+		if (myHero.level + 1 - GetLevelPoints(myHero)) then
+			DelayAction(function() 
+			LevelSpell(SkillOrders[1][myHero.level + 1 - GetLevelPoints(myHero)]) 
+			end, 1)
+		end
+	end
+end
+
 
 function CurrentTarget()
 	if GoSWalkLoaded then
