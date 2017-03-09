@@ -113,21 +113,29 @@ local SkillOrders = {_Q, _E, _W, _Q, _Q, _R, _Q, _E, _Q, _E, _R, _E, _E, _W, _W,
 --Mode
 function Mode() --Deftsu
     if IOW_Loaded then
+		BlockF7OrbWalk(true)
         return IOW:Mode()
     elseif DAC_Loaded then
+		BlockF7OrbWalk(true)
         return DAC:Mode()
     elseif PW_Loaded then
+		BlockF7OrbWalk(true)
         return PW:Mode()
     elseif GoSWalkLoaded and GoSWalk.CurrentMode then
+		BlockF7OrbWalk(true)
         return ({"Combo", "Harass", "LaneClear", "LastHit"})[GoSWalk.CurrentMode+1]
     elseif AutoCarry_Loaded then
+		BlockF7OrbWalk(true)
         return DACR:Mode()
     elseif _G.SLW_Loaded then
+		BlockF7OrbWalk(true)
         return SLW:Mode()
     elseif EOW_Loaded then
+		BlockF7OrbWalk(true)
         return EOW:Mode()
     end
     return ""
+
 end
 
 OnDraw(function()
