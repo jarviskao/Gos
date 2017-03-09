@@ -1,5 +1,5 @@
 --[[
-This is not my work and i make s little change
+This is not my work and i make a little change
 It made by BluePrinceEB
 origninal source: https://github.com/BluePrinceEB/GoS/blob/master/Garen.lua
 
