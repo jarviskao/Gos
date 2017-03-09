@@ -1,4 +1,6 @@
 --[[
+This script have not published on GOS.
+
 This is not my work and i make a little change
 It made by BluePrinceEB
 origninal source: https://github.com/BluePrinceEB/GoS/blob/master/Garen.lua
@@ -9,6 +11,7 @@ It modified by Jarviskao
 -add the function to get current target depending on different orb walking script
 -modify the range of spell and drawing as well as the damage output
 -remove the hp and damage drawing
+-etc...
 -support the lastest version
 source: https://github.com/jarviskao/Gos/blob/master/Garen.lua
 
