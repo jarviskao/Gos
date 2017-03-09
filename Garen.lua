@@ -108,7 +108,7 @@ local LoL = "7.5"
 --Spells
 local GarenE = { range = GetCastRange(myHero, _E) }
 local GarenR = { range = GetCastRange(myHero, _R) }
-local SkillOrders = { {_Q, _E, _W, _Q, _Q, _R, _Q, _E, _Q, _E, _R, _E, _E, _W, _W, _R, _W, _W} }
+local SkillOrders = {_Q, _E, _W, _Q, _Q, _R, _Q, _E, _Q, _E, _R, _E, _E, _W, _W, _R, _W, _W}
 
 --Mode
 function Mode() --Deftsu
@@ -262,7 +262,7 @@ function AutoLvSpell()
 	if GetLevelPoints(myHero) > 0 and GMenu.Misc.LvUpSpell.UseAutoLvSpell:Value() then
 		if (myHero.level + 1 - GetLevelPoints(myHero)) then
 			DelayAction(function() 
-			LevelSpell(SkillOrders[1][myHero.level + 1 - GetLevelPoints(myHero)]) 
+			LevelSpell(SkillOrders[myHero.level + 1 - GetLevelPoints(myHero)]) 
 			end, 1)
 		end
 	end
