@@ -41,23 +41,23 @@ GMenu.c:Slider("Qrange", "Min. range for use Q", 300, 0, 1000, 10)
 GMenu.c:Boolean("E", "Use E", true)
 
 --LastHit Menu
-GMenu:SubMenu("l", "Last Hit")
-GMenu.l:Boolean("Q", "Use Q", true)
+GMenu:SubMenu("LastHit", "Last Hit")
+GMenu.LastHit:Boolean("Q", "Use Q", true)
 
 --Harass Menu
-GMenu:SubMenu("h", "Harass")
-GMenu.h:Boolean("Q", "Use Q", true)
-GMenu.h:Slider("Qrange", "Min. range for use Q", 300, 0, 1000, 10)
-GMenu.h:Boolean("E", "Use E", true)
+GMenu:SubMenu("Harass", "Harass")
+GMenu.Harass:Boolean("Q", "Use Q", true)
+GMenu.Harass:Slider("Qrange", "Min. range for use Q", 300, 0, 1000, 10)
+GMenu.Harass:Boolean("E", "Use E", true)
 
 --Clear Menu
-GMenu:SubMenu("cl", "Clear")
-GMenu.cl:SubMenu("l", "Lane Clear")
-GMenu.cl.l:Boolean("Q", "Use Q", false)
-GMenu.cl.l:Boolean("E", "Use E", false)
-GMenu.cl:SubMenu("j", "Jungle Clear")
-GMenu.cl.j:Boolean("Q", "Use Q", true)
-GMenu.cl.j:Boolean("E", "Use E", true)
+GMenu:SubMenu("Clear", "Clear")
+GMenu.Clear:SubMenu("LaneClear", "Lane Clear")
+GMenu.Clear.LaneClear:Boolean("Q", "Use Q", false)
+GMenu.Clear.LaneClear:Boolean("E", "Use E", false)
+GMenu.Clear:SubMenu("JungleClear", "Jungle Clear")
+GMenu.Clear.JungleClear:Boolean("Q", "Use Q", true)
+GMenu.Clear.JungleClear:Boolean("E", "Use E", true)
 
 --KillSteal Menu
 GMenu:SubMenu("KillSteal", "KillSteal")
@@ -100,7 +100,7 @@ local LoL = "7.5"
 --Spells
 local GarenE = { range = GetCastRange(myHero, _E) }
 local GarenR = { range = GetCastRange(myHero, _R) }
-local SkillOrders = { {_Q, _E, _W, _Q, _Q, _R, _Q,_E,_Q,_E,_R,_E,_E,_W,_W,_R,_W,_W} }
+local SkillOrders = { {_Q, _E, _W, _Q, _Q, _R, _Q, _E, _Q, _E, _R, _E, _E, _W, _W, _R, _W, _W} }
 
 --Mode
 function Mode() --Deftsu
@@ -138,8 +138,8 @@ end)
 OnDraw(function()
     --Range
     if not IsDead(myHero) then
-        if GMenu.Misc.DrawSpells.E:Value() then DrawCircle(myHero, GarenE.range, 1, 15, GoS.Red) end
-        if GMenu.Misc.DrawSpells.R:Value() then DrawCircle(myHero, GarenR.range, 1, 15, GoS.Green) end
+        if GMenu.Misc.DrawSpells.E:Value() then DrawCircle(myHero, GarenE.range, 1, 50, GoS.Red) end
+        if GMenu.Misc.DrawSpells.R:Value() then DrawCircle(myHero, GarenR.range, 1, 50, GoS.Green) end
     end 
 end)
 
@@ -183,7 +183,7 @@ function LastHit()
     if Mode() == "LastHit" then
         for _, minion in pairs(minionManager.objects) do
             if GetTeam(minion) == MINION_ENEMY then
-                if GMenu.l.Q:Value() and Ready(_Q) and ValidTarget(minion, 400) then
+                if GMenu.LastHit.Q:Value() and Ready(_Q) and ValidTarget(minion, 400) then
                     if getdmg("Q",minion,myHero) > GetCurrentHP(minion) then
                         CastSpell(_Q)
                         AttackUnit(minion)
@@ -198,11 +198,11 @@ function Harass()
     if Mode() == "Harass" then
 		local target = CurrentTarget()
         --Q
-        if Ready(_Q) and GMenu.h.Q:Value() and ValidTarget(target, GMenu.h.Qrange:Value()) then
+        if Ready(_Q) and GMenu.Harass.Q:Value() and ValidTarget(target, GMenu.Harass.Qrange:Value()) then
             CastSpell(_Q)
         end
         --E
-        if Ready(_E) and GMenu.h.E:Value() and ValidTarget(target, GarenE.range) and GetCastName(myHero, _E) == "GarenE" then
+        if Ready(_E) and GMenu.Harass.E:Value() and ValidTarget(target, GarenE.range) and GetCastName(myHero, _E) == "GarenE" then
             CastSpell(_E)
         end
     end
@@ -213,11 +213,11 @@ function Clear()
         for _, minion in pairs(minionManager.objects) do
             if GetTeam(minion) == MINION_ENEMY then
                 --Q
-                if Ready(_Q) and GMenu.cl.l.Q:Value() and ValidTarget(minion, 300) then
+                if Ready(_Q) and GMenu.Clear.LaneClear.Q:Value() and ValidTarget(minion, 300) then
                     CastSpell(_Q)
                 end
                 --E
-                if Ready(_E) and GMenu.cl.l.E:Value() and ValidTarget(minion, GarenE.range) and GetCastName(myHero, _E) == "GarenE" and MinionsAround(minion, 950) >= 3 then
+                if Ready(_E) and GMenu.Clear.LaneClear.E:Value() and ValidTarget(minion, GarenE.range) and GetCastName(myHero, _E) == "GarenE" and MinionsAround(minion, 950) >= 3 then
                     CastSpell(_E)
                 end
             end
@@ -228,11 +228,11 @@ function Clear()
         for _, mob in pairs(minionManager.objects) do
             if GetTeam(mob) == MINION_JUNGLE then
                 --Q
-                if Ready(_Q) and GMenu.cl.j.Q:Value() and ValidTarget(mob, 300) then
+                if Ready(_Q) and GMenu.Clear.JungleClear.Q:Value() and ValidTarget(mob, 300) then
                     CastSpell(_Q)
                 end
                 --E
-                if Ready(_E) and GMenu.cl.j.E:Value() and ValidTarget(mob, GarenE.range) and GetCastName(myHero, _E) == "GarenE" then
+                if Ready(_E) and GMenu.Clear.JungleClear.E:Value() and ValidTarget(mob, GarenE.range) and GetCastName(myHero, _E) == "GarenE" then
                     CastSpell(_E)
                 end
             end
