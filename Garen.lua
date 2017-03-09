@@ -87,7 +87,7 @@ GMenu.Misc.LvUpSpell:Boolean("UseAutoLvSpell", "Use Auto Level Spell", false)
 GMenu.Misc:SubMenu("Skin", "Skin Changer")
   skinMeta = {["Garen"] = {"Classic", "Sanguine Garen", "Desert Trooper Garen", "Commando Garen", "Dreadknight Garen", "Rugged Garen", "Steel Legion Garen", "Garnet Chroma", "Plum Chroma", "Ivory Chroma", "Rogue Admiral Garen", "Warring Kingdoms Garen"}}
 GMenu.Misc.Skin:DropDown('skin', myHero.charName.. " Skins", 1, skinMeta[myHero.charName],function(model)
-						  HeroSkinChanger(myHero, model - 1) print(skinMeta[myHero.charName][model] .." ".. myHero.charName .. " Loaded!") 
+						  HeroSkinChanger(myHero, model - 1) print(" [Skin] ".. skinMeta[myHero.charName][model] .." ".. myHero.charName .. " Loaded!") 
     end,true)
 --Draw Menu
 GMenu.Misc:SubMenu("DrawSpells", "Draw Spells")
