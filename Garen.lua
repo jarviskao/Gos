@@ -1,10 +1,17 @@
 --[[
-This is not my work and i make a little change
+This is not my work and i make s little change
 It made by BluePrinceEB
 origninal source: https://github.com/BluePrinceEB/GoS/blob/master/Garen.lua
 
 It modified by Jarviskao 
+-add missing skin
+-add auto Level Up Spell
+-add the function to get current target depending on different orb walking script
+-modify the range of spell and drawing as well as the damage output
+-remove the hp and damage drawing
+-support the lastest version
 source: https://github.com/jarviskao/Gos/blob/master/Garen.lua
+
 
 ]]
 
@@ -140,8 +147,8 @@ end)
 --Start
 OnTick(function ()
 	if not IsDead(myHero) then
-		--Functions
-		Combo()
+	--Functions
+	Combo()
         LastHit()
         Harass()
         Clear()
@@ -192,7 +199,7 @@ end
 
 function Harass()
     if Mode() == "Harass" then
-		local target = CurrentTarget()
+	local target = CurrentTarget()
         --Q
         if Ready(_Q) and GMenu.Harass.Q:Value() and ValidTarget(target, GMenu.Harass.Qrange:Value()) then
             CastSpell(_Q)
