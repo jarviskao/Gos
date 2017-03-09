@@ -10,7 +10,7 @@ if GetObjectName(GetMyHero()) ~= "Darius" then return end
 require "DamageLib"
 
 --Auto Update
-local ver = "1.1"
+local ver = "1.2"
 
 
 function AutoUpdate(data)
@@ -60,36 +60,55 @@ DelayAction(function()
     end
 end, 0.01)
 
---Draw Menu
-DMenu:SubMenu("Draw", "Draw")
-DMenu.Draw:SubMenu("Spells", "Spells")
-DMenu.Draw.Spells:Boolean("Q", "Draw Q Range", false)
-DMenu.Draw.Spells:Boolean("E", "Draw E Range", false)
-DMenu.Draw.Spells:Boolean("R", "Draw R Range", false)
+--Miscellaneous  (Auto Level Up Spell Menu)
+DMenu:SubMenu("Misc", "Miscellaneous")
+DMenu.Misc:SubMenu("LvUpSpell", "Auto Level Spell")
+DMenu.Misc.LvUpSpell:Info("AutoLvSpellInfo", "Order: Max Q -> W -> E")
+DMenu.Misc.LvUpSpell:Boolean("UseAutoLvSpell", "Use Auto Level Spell", false)
 
+--Miscellaneous  (Skin Menu) 
+DMenu.Misc:SubMenu("Skin", "Skin Changer")
+  skinMeta = {["Garen"] = { "Classic", "Lord", "BioForge", "Woad King", "DunkMaster", "Black Iron Chroma", "Bronze Chroma", "Copper Chroma", "Academy", "Amethyst", "Aquamarine", "Catseye", "Citrine", "Emerald" }}
+DMenu.Misc.Skin:DropDown('skin', myHero.charName.. " Skins", 1, skinMeta[myHero.charName],function(model)
+						  HeroSkinChanger(myHero, model - 1) print("<font color=\"#0099FF\"><b>[Skin]</b></font> ".. skinMeta[myHero.charName][model] .." ".. myHero.charName .. " Loaded!") 
+    end,true)
+--Miscellaneous  (Draw Spells Menu)  
+DMenu.Misc:SubMenu("DrawSpells", "Draw Spells")
+DMenu.Misc.DrawSpells:Boolean("Q", "Draw Q Range", false)
+DMenu.Misc.DrawSpells:Boolean("E", "Draw E Range", false)
+DMenu.Misc.DrawSpells:Boolean("R", "Draw R Range", false)
+    
 --Locals
-local LoL = "7.x"
+local LoL = "7.5"
 
 --Spells
 local DariusQ = { range = 425 }
 local DariusE = { range = GetCastRange(myHero, _E) }
 local DariusR = { range = GetCastRange(myHero, _R) }
+local SkillOrders = {_Q, _E, _Q, _W, _Q, _R, _Q, _W, _Q, _W, _R, _W, _E, _W, _E, _R, _E, _E}
 
 --Mode
 function Mode() --Deftsu
     if IOW_Loaded then
+		BlockF7OrbWalk(true)
         return IOW:Mode()
     elseif DAC_Loaded then
+		BlockF7OrbWalk(true)
         return DAC:Mode()
     elseif PW_Loaded then
+		BlockF7OrbWalk(true)
         return PW:Mode()
     elseif GoSWalkLoaded and GoSWalk.CurrentMode then
+		BlockF7OrbWalk(true)
         return ({"Combo", "Harass", "LaneClear", "LastHit"})[GoSWalk.CurrentMode+1]
     elseif AutoCarry_Loaded then
+		BlockF7OrbWalk(true)
         return DACR:Mode()
     elseif _G.SLW_Loaded then
+		BlockF7OrbWalk(true)
         return SLW:Mode()
     elseif EOW_Loaded then
+		BlockF7OrbWalk(true)
         return EOW:Mode()
     end
     return ""
@@ -98,14 +117,14 @@ end
 OnDraw(function()
     --Range
     if not IsDead(myHero) then
-		if DMenu.Draw.Spells.Q:Value() then 
+		if DMenu.Misc.DrawSpells.Q:Value() then 
 			DrawCircle(myHero,205+GetHitBox(myHero),0,50,ARGB(255, 0, 255, 0))
 			DrawCircle(myHero,DariusQ.range,0,50,ARGB(255, 0, 255, 0))
 		end
-        if DMenu.Draw.Spells.E:Value() then 
+        if DMenu.Misc.DrawSpells.E:Value() then 
 			DrawCircle(myHero, DariusE.range,0,50,ARGB(255, 173, 255, 47)) 
 		end
-        if DMenu.Draw.Spells.R:Value() then 
+        if DMenu.Misc.DrawSpells.R:Value() then 
 			DrawCircle(myHero, DariusR.range,0,50, ARGB(255, 255, 165, 0)) 
         end
     end 
